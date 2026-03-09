@@ -16,6 +16,16 @@
             --border-color: #e5e7eb;
         }
 
+        /* Dark mode variables */
+        body.dark-mode {
+            --bg-color: #111827;
+            --text-main: #f9fafb;
+            --text-muted: #9ca3af;
+            --primary: #10b981;
+            --card-bg: #1f2937;
+            --border-color: #374151;
+        }
+
         body {
             font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
             background-color: var(--bg-color);
@@ -24,6 +34,7 @@
             padding: 20px;
             display: flex;
             justify-content: center;
+            transition: background-color 0.3s, color 0.3s;
         }
 
         .container {
@@ -34,6 +45,8 @@
             padding: 25px 20px;
             border-radius: 24px;
             box-shadow: 0 10px 40px rgba(0, 0, 0, 0.05);
+            transition: background-color 0.3s;
+            position: relative;
         }
 
         h1 {
@@ -116,6 +129,7 @@
             display: flex;
             flex-direction: column;
             gap: 12px;
+            margin-bottom: 20px;
         }
 
         .month-item {
@@ -125,6 +139,7 @@
             padding: 15px;
             background: var(--bg-color);
             border-radius: 16px;
+            transition: background-color 0.3s;
         }
 
         .left-section {
@@ -148,12 +163,13 @@
             appearance: none;
             width: 24px;
             height: 24px;
-            border: 2px solid #d1d5db;
+            border: 2px solid var(--border-color);
             border-radius: 50%;
             /* Circular */
             cursor: pointer;
             position: relative;
             transition: all 0.2s;
+            background-color: transparent;
         }
 
         input[type="checkbox"]:checked {
@@ -168,6 +184,24 @@
             font-size: 16px;
             left: 4px;
             top: 0px;
+        }
+
+        /* Toggle Button */
+        button.theme-toggle {
+            width: 100%;
+            padding: 12px;
+            border-radius: 12px;
+            border: 1px solid var(--border-color);
+            background: var(--bg-color);
+            color: var(--text-main);
+            font-weight: 500;
+            font-size: 14px;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        button.theme-toggle:hover {
+            opacity: 0.8;
         }
     </style>
 </head>
@@ -208,6 +242,8 @@
         <div class="month-list" id="months-container">
             <!-- JavaScript will populate the months here -->
         </div>
+
+        <button class="theme-toggle" onclick="toggleTheme()">☀️ Toggle Dark Mode</button>
     </div>
 
     <script>
@@ -224,6 +260,29 @@
 
         // Load progress from localStorage
         let savedProgress = JSON.parse(localStorage.getItem("minimal_savings_progress") || "{}");
+
+        // Theme management
+        let isDarkMode = localStorage.getItem("savings_tracker_theme") === "dark";
+        const toggleBtn = document.querySelector('.theme-toggle');
+
+        function applyTheme() {
+            if (isDarkMode) {
+                document.body.classList.add('dark-mode');
+                toggleBtn.textContent = "🌙 Toggle Light Mode";
+            } else {
+                document.body.classList.remove('dark-mode');
+                toggleBtn.textContent = "☀️ Toggle Dark Mode";
+            }
+        }
+
+        function toggleTheme() {
+            isDarkMode = !isDarkMode;
+            localStorage.setItem("savings_tracker_theme", isDarkMode ? "dark" : "light");
+            applyTheme();
+        }
+
+        // Initial theme application
+        applyTheme();
 
         // Function to format numbers as Indian Rupees
         const formatToLakhs = (num) => new Intl.NumberFormat('en-IN', { style: 'currency', currency: 'INR', maximumFractionDigits: 0 }).format(num);
@@ -256,13 +315,13 @@
 
             // Update Yearly Progress
             const yearlyPercentage = (totalSaved / YEARLY_GOAL) * 100;
-            yearlyProgressFill.style.width = \`\${yearlyPercentage}%\`;
-            yearlyGoalText.textContent = \`\${formatToLakhs(totalSaved)} / \${formatToLakhs(YEARLY_GOAL)}\`;
+            yearlyProgressFill.style.width = `${yearlyPercentage}%`;
+            yearlyGoalText.textContent = `${formatToLakhs(totalSaved)} / ${formatToLakhs(YEARLY_GOAL)}`;
 
             // Update Overall Progress
             const overallPercentage = (totalSaved / OVERALL_GOAL) * 100;
-            overallProgressFill.style.width = \`\${overallPercentage}%\`;
-            overallGoalText.textContent = \`\${formatToLakhs(totalSaved)} / \${formatToLakhs(OVERALL_GOAL)}\`;
+            overallProgressFill.style.width = `${overallPercentage}%`;
+            overallGoalText.textContent = `${formatToLakhs(totalSaved)} / ${formatToLakhs(OVERALL_GOAL)}`;
         }
 
         // Initial calculation on load
