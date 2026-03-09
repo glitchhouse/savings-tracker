@@ -11,13 +11,11 @@
             --text-main: #111827;
             --text-muted: #6b7280;
             --primary: #10b981;
-            /* Soft Green */
             --card-bg: #ffffff;
             --border-color: #e5e7eb;
             --input-bg: #f3f4f6;
         }
 
-        /* Dark mode variables */
         body.dark-mode {
             --bg-color: #111827;
             --text-main: #f9fafb;
@@ -42,13 +40,11 @@
         .container {
             width: 100%;
             max-width: 400px;
-            /* Mobile width */
             background: var(--card-bg);
             padding: 25px 20px;
             border-radius: 24px;
             box-shadow: 0 10px 40px rgba(0, 0, 0, 0.05);
             transition: background-color 0.3s;
-            position: relative;
         }
 
         h1 {
@@ -65,16 +61,10 @@
             text-align: center;
         }
 
-        /* Progress Bar Styles */
         .progress-section {
             margin-bottom: 25px;
             padding-bottom: 25px;
             border-bottom: 1px solid var(--border-color);
-        }
-
-        .progress-section:last-of-type {
-            border-bottom: none;
-            margin-bottom: 15px;
         }
 
         .progress-labels {
@@ -99,7 +89,6 @@
             border-radius: 10px;
             overflow: hidden;
             position: relative;
-            /* For milestones */
         }
 
         .progress-bar-fill {
@@ -118,6 +107,7 @@
             height: 100%;
             display: flex;
             justify-content: space-around;
+            pointer-events: none;
         }
 
         .dot {
@@ -126,7 +116,7 @@
             background-color: rgba(255, 255, 255, 0.7);
         }
 
-        /* Surplus Area */
+        /* Surplus */
         .surplus-container {
             display: flex;
             align-items: center;
@@ -149,7 +139,6 @@
             background: var(--input-bg);
             border-radius: 8px;
             padding: 5px 10px;
-            position: relative;
         }
 
         .currency-symbol {
@@ -182,7 +171,7 @@
             opacity: 1;
         }
 
-        /* Month List Styles */
+        /* Month list */
         .month-list {
             display: flex;
             flex-direction: column;
@@ -223,11 +212,11 @@
             height: 24px;
             border: 2px solid var(--border-color);
             border-radius: 50%;
-            /* Circular */
             cursor: pointer;
             position: relative;
             transition: all 0.2s;
             background-color: transparent;
+            flex-shrink: 0;
         }
 
         input[type="checkbox"]:checked {
@@ -239,12 +228,12 @@
             content: '✓';
             position: absolute;
             color: white;
-            font-size: 16px;
+            font-size: 14px;
             left: 4px;
-            top: 0px;
+            top: 1px;
         }
 
-        /* Toggle Button */
+        /* Dark mode toggle */
         button.theme-toggle {
             width: 100%;
             padding: 12px;
@@ -265,7 +254,6 @@
 </head>
 
 <body>
-
     <div class="container">
         <h1>Savings Goals</h1>
         <p class="subtitle">Your progress towards financial freedom</p>
@@ -274,14 +262,13 @@
         <div class="progress-section">
             <div class="progress-labels">
                 <span class="progress-title">Overall Goal</span>
-                <span class="progress-value" id="overall-goal-text">₹0 / ₹45,00,000</span>
+                <span class="progress-value" id="overall-goal-text">Rs.0 / Rs.45,00,000</span>
             </div>
             <div class="progress-bar-bg">
                 <div class="progress-bar-fill" id="overall-progress-fill"></div>
-                <!-- Milestone Dots at 12, 24, 36 Lakhs -->
                 <div class="milestone-dots">
-                    <div class="dot" style="margin-left: 26.66%;"></div> <!-- 12/45 -->
-                    <div class="dot" style="margin-right: 26.66%;"></div> <!-- 24/45 -> 12 from end -->
+                    <div class="dot"></div>
+                    <div class="dot"></div>
                 </div>
             </div>
         </div>
@@ -290,7 +277,7 @@
         <div class="progress-section">
             <div class="progress-labels">
                 <span class="progress-title">Yearly Progress (2026)</span>
-                <span class="progress-value" id="yearly-goal-text">₹0 / ₹12,00,000</span>
+                <span class="progress-value" id="yearly-goal-text">Rs.0 / Rs.12,00,000</span>
             </div>
             <div class="progress-bar-bg">
                 <div class="progress-bar-fill" id="yearly-progress-fill"></div>
@@ -301,138 +288,137 @@
         <div class="surplus-container">
             <span class="surplus-label">Surplus Amount</span>
             <div class="surplus-input-wrapper">
-                <span class="currency-symbol">₹</span>
+                <span class="currency-symbol">&#8377;</span>
                 <input type="text" id="surplus-input" class="surplus-input" placeholder="0"
                     oninput="handleSurplusInput(this)">
-                <span id="surplus-check" class="surplus-check">✓</span>
+                <span id="surplus-check" class="surplus-check">&#10003;</span>
             </div>
         </div>
 
-        <div class="month-list" id="months-container">
-            <!-- JavaScript will populate the months here -->
-        </div>
+        <!-- Month List -->
+        <div class="month-list" id="months-container"></div>
 
-        <button class="theme-toggle" onclick="toggleTheme()">☀️ Toggle Dark Mode</button>
+        <button class="theme-toggle" id="theme-btn" onclick="toggleTheme()">Toggle Dark Mode</button>
     </div>
 
     <script>
-        const months = ["Jan 2026", "Feb 2026", "Mar 2026", "Apr 2026", "May 2026", "Jun 2026", "Jul 2026", "Aug 2026", "Sep 2026", "Oct 2026", "Nov 2026", "Dec 2026"];
-        const container = document.getElementById('months-container');
-        const yearlyProgressFill = document.getElementById('yearly-progress-fill');
-        const overallProgressFill = document.getElementById('overall-progress-fill');
-        const yearlyGoalText = document.getElementById('yearly-goal-text');
-        const overallGoalText = document.getElementById('overall-goal-text');
-        const surplusInput = document.getElementById('surplus-input');
-        const surplusCheck = document.getElementById('surplus-check');
+        var MONTHS = ["Jan 2026", "Feb 2026", "Mar 2026", "Apr 2026", "May 2026", "Jun 2026", "Jul 2026", "Aug 2026", "Sep 2026", "Oct 2026", "Nov 2026", "Dec 2026"];
+        var SAVING_PER_MONTH = 100000;
+        var YEARLY_GOAL = 1200000;
+        var OVERALL_GOAL = 4500000;
 
-        const SAVING_PER_MONTH = 100000;
-        const YEARLY_GOAL = 1200000;
-        const OVERALL_GOAL = 4500000;
+        var savedProgress = JSON.parse(localStorage.getItem("savings_progress") || "{}");
+        var savedSurplus = parseInt(localStorage.getItem("savings_surplus") || "0");
+        var isDarkMode = localStorage.getItem("savings_theme") === "dark";
 
-        // Load progress from localStorage
-        let savedProgress = JSON.parse(localStorage.getItem("minimal_savings_progress") || "{}");
-        let savedSurplus = localStorage.getItem("minimal_surplus_amount") || "0";
+        var yearlyFill = document.getElementById("yearly-progress-fill");
+        var overallFill = document.getElementById("overall-progress-fill");
+        var yearlyText = document.getElementById("yearly-goal-text");
+        var overallText = document.getElementById("overall-goal-text");
+        var surplusInputEl = document.getElementById("surplus-input");
+        var surplusCheckEl = document.getElementById("surplus-check");
+        var themeBtn = document.getElementById("theme-btn");
+        var monthsContainer = document.getElementById("months-container");
 
-        // Initialize surplus input
-        surplusInput.value = parseInt(savedSurplus).toLocaleString('en-IN') || "";
+        function fmt(num) {
+            return new Intl.NumberFormat('en-IN', { style: 'currency', currency: 'INR', maximumFractionDigits: 0 }).format(num);
+        }
 
-        // Theme management
-        let isDarkMode = localStorage.getItem("savings_tracker_theme") === "dark";
-        const toggleBtn = document.querySelector('.theme-toggle');
-
+        // Apply theme
         function applyTheme() {
             if (isDarkMode) {
                 document.body.classList.add('dark-mode');
-                toggleBtn.textContent = "🌙 Toggle Light Mode";
+                themeBtn.textContent = "Toggle Light Mode";
             } else {
                 document.body.classList.remove('dark-mode');
-                toggleBtn.textContent = "☀️ Toggle Dark Mode";
+                themeBtn.textContent = "Toggle Dark Mode";
             }
         }
-
         function toggleTheme() {
             isDarkMode = !isDarkMode;
-            localStorage.setItem("savings_tracker_theme", isDarkMode ? "dark" : "light");
+            localStorage.setItem("savings_theme", isDarkMode ? "dark" : "light");
             applyTheme();
         }
-
-        // Initial theme application
         applyTheme();
 
-        // Function to format numbers as Indian Rupees
-        const formatToLakhs = (num) => new Intl.NumberFormat('en-IN', { style: 'currency', currency: 'INR', maximumFractionDigits: 0 }).format(num);
-
-        let checkTimeout;
-
-        function handleSurplusInput(inputElement) {
-            // Remove non-digit characters to get raw number
-            let rawValue = inputElement.value.replace(/\\D/g, '');
-            if (!rawValue) rawValue = "0";
-
-            // Save raw value to localStorage
-            localStorage.setItem("minimal_surplus_amount", rawValue);
-            savedSurplus = rawValue;
-
-            // Format back to Indian Rupee convention visually in the input box
-            const numberValue = parseInt(rawValue);
-            inputElement.value = numberValue === 0 ? "" : numberValue.toLocaleString('en-IN');
-
-            // Show temporary checkmark
-            surplusCheck.classList.add('show');
-            clearTimeout(checkTimeout);
-            checkTimeout = setTimeout(() => {
-                surplusCheck.classList.remove('show');
-            }, 1000); // Checkmark disappears after 1 second
-
-            // Recalculate everything
-            calculateProgress();
-        }
-
-        months.forEach(month => {
-            const item = document.createElement('div');
+        // Build month list
+        MONTHS.forEach(function (month) {
+            var item = document.createElement('div');
             item.className = 'month-item';
 
-            const isChecked = savedProgress[month] ? "checked" : "";
+            var left = document.createElement('div');
+            left.className = 'left-section';
 
-            item.innerHTML = `
-                <div class="left-section">
-                    <input type="checkbox" class="month-checkbox" data-month="${month}" onchange="calculateProgress(this)" ${isChecked}>
-                    <span class="month-name">${month}</span>
-                </div>
-                <span class="amount">${formatToLakhs(SAVING_PER_MONTH)}</span>
-            `;
-            container.appendChild(item);
+            var cb = document.createElement('input');
+            cb.type = 'checkbox';
+            cb.className = 'month-checkbox';
+            cb.setAttribute('data-month', month);
+            cb.checked = !!savedProgress[month];
+            cb.onchange = function () { onCheckboxChange(this); };
+
+            var name = document.createElement('span');
+            name.className = 'month-name';
+            name.textContent = month;
+
+            left.appendChild(cb);
+            left.appendChild(name);
+
+            var amt = document.createElement('span');
+            amt.className = 'amount';
+            amt.textContent = fmt(SAVING_PER_MONTH);
+
+            item.appendChild(left);
+            item.appendChild(amt);
+            monthsContainer.appendChild(item);
         });
 
-        function calculateProgress(checkboxElement) {
-            // Update localStorage if triggered by a checkbox change
-            if (checkboxElement) {
-                savedProgress[checkboxElement.dataset.month] = checkboxElement.checked;
-                localStorage.setItem("minimal_savings_progress", JSON.stringify(savedProgress));
-            }
-
-            const checkedCount = document.querySelectorAll('.month-checkbox:checked').length;
-            const progressFromMonths = checkedCount * SAVING_PER_MONTH;
-            const surplusAmount = parseInt(savedSurplus) || 0;
-
-            // Total includes months progress + surplus
-            const totalDisplayAmount = progressFromMonths + surplusAmount;
-
-            // Progress bar filling ONLY depends on the checked months (progressFromMonths)
-            const yearlyPercentage = Math.min((progressFromMonths / YEARLY_GOAL) * 100, 100);
-            yearlyProgressFill.style.width = \`\${yearlyPercentage}%\`;
-            
-            // Text display depends on the total combined amount
-            yearlyGoalText.textContent = \`\${formatToLakhs(totalDisplayAmount)} / \${formatToLakhs(YEARLY_GOAL)}\`;
-
-            // Same logic for overall goal
-            const overallPercentage = Math.min((progressFromMonths / OVERALL_GOAL) * 100, 100);
-            overallProgressFill.style.width = \`\${overallPercentage}%\`;
-            overallGoalText.textContent = \`\${formatToLakhs(totalDisplayAmount)} / \${formatToLakhs(OVERALL_GOAL)}\`;
+        // Set surplus input display
+        if (savedSurplus > 0) {
+            surplusInputEl.value = savedSurplus.toLocaleString('en-IN');
         }
 
-        // Initial calculation on load
-        calculateProgress();
+        var checkTimer;
+        function handleSurplusInput(el) {
+            var raw = el.value.replace(/\D/g, '');
+            savedSurplus = raw ? parseInt(raw) : 0;
+            localStorage.setItem("savings_surplus", savedSurplus);
+
+            // Format in Indian convention
+            el.value = savedSurplus > 0 ? savedSurplus.toLocaleString('en-IN') : '';
+
+            // Show temporary checkmark
+            surplusCheckEl.classList.add('show');
+            clearTimeout(checkTimer);
+            checkTimer = setTimeout(function () {
+                surplusCheckEl.classList.remove('show');
+            }, 1200);
+
+            updateProgress();
+        }
+
+        function onCheckboxChange(cb) {
+            savedProgress[cb.getAttribute('data-month')] = cb.checked;
+            localStorage.setItem("savings_progress", JSON.stringify(savedProgress));
+            updateProgress();
+        }
+
+        function updateProgress() {
+            var checked = document.querySelectorAll('.month-checkbox:checked').length;
+            var fromMonths = checked * SAVING_PER_MONTH;
+            var total = fromMonths + savedSurplus;
+
+            // Progress bars only reflect checkbox months
+            var yp = Math.min((fromMonths / YEARLY_GOAL) * 100, 100);
+            var op = Math.min((fromMonths / OVERALL_GOAL) * 100, 100);
+            yearlyFill.style.width = yp + '%';
+            overallFill.style.width = op + '%';
+
+            // Labels show total (months + surplus)
+            yearlyText.textContent = fmt(total) + ' / ' + fmt(YEARLY_GOAL);
+            overallText.textContent = fmt(total) + ' / ' + fmt(OVERALL_GOAL);
+        }
+
+        updateProgress();
     </script>
 </body>
 
