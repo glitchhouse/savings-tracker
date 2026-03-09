@@ -1,165 +1,273 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Savings Tracker</title>
+    <title>Minimalist Savings Tracker</title>
     <style>
+        :root {
+            --bg-color: #f9fafb;
+            --text-main: #111827;
+            --text-muted: #6b7280;
+            --primary: #10b981;
+            /* Soft Green */
+            --card-bg: #ffffff;
+            --border-color: #e5e7eb;
+        }
+
         body {
             font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-main);
             margin: 0;
             padding: 20px;
-            background: #f0f2f5;
+            display: flex;
+            justify-content: center;
         }
-        
-        #lockscreen {
-            position: fixed;
+
+        .container {
+            width: 100%;
+            max-width: 400px;
+            /* Mobile width */
+            background: var(--card-bg);
+            padding: 25px 20px;
+            border-radius: 24px;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.05);
+        }
+
+        h1 {
+            font-size: 24px;
+            margin: 0;
+            font-weight: 600;
+            text-align: center;
+        }
+
+        .subtitle {
+            margin: 4px 0 20px 0;
+            color: var(--text-muted);
+            font-size: 14px;
+            text-align: center;
+        }
+
+        /* Progress Bar Styles */
+        .progress-section {
+            margin-bottom: 25px;
+            padding-bottom: 25px;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .progress-section:last-of-type {
+            border-bottom: none;
+            margin-bottom: 15px;
+        }
+
+        .progress-labels {
+            display: flex;
+            justify-content: space-between;
+            font-size: 14px;
+            font-weight: 500;
+            margin-bottom: 8px;
+        }
+
+        .progress-title {
+            font-weight: 600;
+        }
+
+        .progress-value {
+            color: var(--text-muted);
+        }
+
+        .progress-bar-bg {
+            background-color: var(--border-color);
+            height: 12px;
+            border-radius: 10px;
+            overflow: hidden;
+            position: relative;
+            /* For milestones */
+        }
+
+        .progress-bar-fill {
+            background-color: var(--primary);
+            height: 100%;
+            width: 0%;
+            transition: width 0.4s ease;
+            border-radius: 10px;
+        }
+
+        .milestone-dots {
+            position: absolute;
             top: 0;
             left: 0;
             width: 100%;
             height: 100%;
-            background: #f9fafb;
+            display: flex;
+            justify-content: space-around;
+        }
+
+        .dot {
+            height: 100%;
+            width: 3px;
+            background-color: rgba(255, 255, 255, 0.7);
+        }
+
+        /* Month List Styles */
+        .month-list {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .month-item {
             display: flex;
             align-items: center;
-            justify-content: center;
-            z-index: 999;
-        }
-
-        .lock-box {
-            background: white;
-            padding: 30px;
+            justify-content: space-between;
+            padding: 15px;
+            background: var(--bg-color);
             border-radius: 16px;
-            text-align: center;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
         }
 
-        #pinInput {
-            font-size: 20px;
-            padding: 10px;
-            width: 120px;
-            text-align: center;
-            margin-bottom: 10px;
-            border: 1px solid #ccc;
-            border-radius: 8px;
+        .left-section {
+            display: flex;
+            align-items: center;
+            gap: 15px;
         }
-        
-        button {
-            background: #007aff;
-            color: white;
-            border: none;
-            padding: 10px 20px;
+
+        .month-name {
+            font-weight: 500;
             font-size: 16px;
-            border-radius: 8px;
-            cursor: pointer;
         }
-        
-        button:hover {
-            background: #0056b3;
+
+        .amount {
+            color: var(--text-muted);
+            font-weight: 500;
         }
-        
-        .container {
-            max-width: 600px;
-            margin: 0 auto;
-            background: white;
-            padding: 20px;
-            border-radius: 16px;
-            box-shadow: 0 4px 6px rgba(0,0,0,0.05);
-        }
-        
-        .month {
-            display: flex;
-            align-items: center;
-            padding: 15px 0;
-            border-bottom: 1px solid #eee;
-        }
-        
-        .month:last-child {
-            border-bottom: none;
-        }
-        
-        .month label {
-            flex-grow: 1;
-            font-size: 18px;
-            cursor: pointer;
-        }
-        
+
+        /* Custom Checkbox */
         input[type="checkbox"] {
+            appearance: none;
             width: 24px;
             height: 24px;
+            border: 2px solid #d1d5db;
+            border-radius: 50%;
+            /* Circular */
             cursor: pointer;
+            position: relative;
+            transition: all 0.2s;
+        }
+
+        input[type="checkbox"]:checked {
+            background-color: var(--primary);
+            border-color: var(--primary);
+        }
+
+        input[type="checkbox"]:checked::after {
+            content: '✓';
+            position: absolute;
+            color: white;
+            font-size: 16px;
+            left: 4px;
+            top: 0px;
         }
     </style>
 </head>
+
 <body>
 
-    <div id="lockscreen">
-        <div class="lock-box">
-            <h2>Enter PIN</h2>
-            <input type="password" id="pinInput" maxlength="4" placeholder="••••">
-            <br>
-            <button onclick="unlock()">Unlock</button>
-        </div>
-    </div>
+    <div class="container">
+        <h1>Savings Goals</h1>
+        <p class="subtitle">Your progress towards financial freedom</p>
 
-    <div class="container" id="app" style="display: none;">
-        <h1>Monthly Savings Tracker</h1>
-        <p>Your progress is saved automatically on this device.</p>
-        
-        <div id="months-container">
+        <!-- Overall Goal: 45 Lakhs -->
+        <div class="progress-section">
+            <div class="progress-labels">
+                <span class="progress-title">Overall Goal</span>
+                <span class="progress-value" id="overall-goal-text">₹0 / ₹45,00,000</span>
+            </div>
+            <div class="progress-bar-bg">
+                <div class="progress-bar-fill" id="overall-progress-fill"></div>
+                <!-- Milestone Dots at 12, 24, 36 Lakhs -->
+                <div class="milestone-dots">
+                    <div class="dot" style="margin-left: 26.66%;"></div> <!-- 12/45 -->
+                    <div class="dot" style="margin-right: 26.66%;"></div> <!-- 24/45 -> 12 from end -->
+                </div>
+            </div>
+        </div>
+
+        <!-- Yearly Goal: 12 Lakhs -->
+        <div class="progress-section">
+            <div class="progress-labels">
+                <span class="progress-title">Yearly Progress (2026)</span>
+                <span class="progress-value" id="yearly-goal-text">₹0 / ₹12,00,000</span>
+            </div>
+            <div class="progress-bar-bg">
+                <div class="progress-bar-fill" id="yearly-progress-fill"></div>
+            </div>
+        </div>
+
+        <div class="month-list" id="months-container">
+            <!-- JavaScript will populate the months here -->
         </div>
     </div>
 
     <script>
-        const DEFAULT_PIN = "1234";
+        const months = ["Jan 2026", "Feb 2026", "Mar 2026", "Apr 2026", "May 2026", "Jun 2026", "Jul 2026", "Aug 2026", "Sep 2026", "Oct 2026", "Nov 2026", "Dec 2026"];
+        const container = document.getElementById('months-container');
+        const yearlyProgressFill = document.getElementById('yearly-progress-fill');
+        const overallProgressFill = document.getElementById('overall-progress-fill');
+        const yearlyGoalText = document.getElementById('yearly-goal-text');
+        const overallGoalText = document.getElementById('overall-goal-text');
 
-        if(!localStorage.getItem("tracker_pin")){
-            localStorage.setItem("tracker_pin", DEFAULT_PIN);
-        }
+        const SAVING_PER_MONTH = 100000;
+        const YEARLY_GOAL = 1200000;
+        const OVERALL_GOAL = 4500000;
 
-        function unlock() {
-            const entered = document.getElementById("pinInput").value;
-            const saved = localStorage.getItem("tracker_pin");
+        // Load progress from localStorage
+        let savedProgress = JSON.parse(localStorage.getItem("minimal_savings_progress") || "{}");
 
-            if(entered === saved){
-                document.getElementById("lockscreen").style.display = "none";
-                document.getElementById("app").style.display = "block";
-                loadProgress();
-            } else {
-                alert("Wrong PIN");
+        // Function to format numbers as Indian Rupees
+        const formatToLakhs = (num) => new Intl.NumberFormat('en-IN', { style: 'currency', currency: 'INR', maximumFractionDigits: 0 }).format(num);
+
+        months.forEach(month => {
+            const item = document.createElement('div');
+            item.className = 'month-item';
+
+            const isChecked = savedProgress[month] ? "checked" : "";
+
+            item.innerHTML = `
+                <div class="left-section">
+                    <input type="checkbox" class="month-checkbox" data-month="${month}" onchange="calculateProgress(this)" ${isChecked}>
+                    <span class="month-name">${month}</span>
+                </div>
+                <span class="amount">${formatToLakhs(SAVING_PER_MONTH)}</span>
+            `;
+            container.appendChild(item);
+        });
+
+        function calculateProgress(checkboxElement) {
+            // Update localStorage if triggered by a checkbox change
+            if (checkboxElement) {
+                savedProgress[checkboxElement.dataset.month] = checkboxElement.checked;
+                localStorage.setItem("minimal_savings_progress", JSON.stringify(savedProgress));
             }
+
+            const checkedCount = document.querySelectorAll('.month-checkbox:checked').length;
+            const totalSaved = checkedCount * SAVING_PER_MONTH;
+
+            // Update Yearly Progress
+            const yearlyPercentage = (totalSaved / YEARLY_GOAL) * 100;
+            yearlyProgressFill.style.width = \`\${yearlyPercentage}%\`;
+            yearlyGoalText.textContent = \`\${formatToLakhs(totalSaved)} / \${formatToLakhs(YEARLY_GOAL)}\`;
+
+            // Update Overall Progress
+            const overallPercentage = (totalSaved / OVERALL_GOAL) * 100;
+            overallProgressFill.style.width = \`\${overallPercentage}%\`;
+            overallGoalText.textContent = \`\${formatToLakhs(totalSaved)} / \${formatToLakhs(OVERALL_GOAL)}\`;
         }
-        
-        const months = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
-        
-        function loadProgress() {
-            const container = document.getElementById("months-container");
-            container.innerHTML = "";
-            
-            let savedProgress = JSON.parse(localStorage.getItem("tracker_progress") || "{}");
-            
-            months.forEach(month => {
-                const div = document.createElement("div");
-                div.className = "month";
-                
-                const label = document.createElement("label");
-                label.htmlFor = month;
-                label.textContent = month;
-                
-                const checkbox = document.createElement("input");
-                checkbox.type = "checkbox";
-                checkbox.id = month;
-                checkbox.checked = savedProgress[month] || false;
-                
-                checkbox.addEventListener("change", (e) => {
-                    savedProgress[month] = e.target.checked;
-                    localStorage.setItem("tracker_progress", JSON.stringify(savedProgress));
-                });
-                
-                div.appendChild(label);
-                div.appendChild(checkbox);
-                container.appendChild(div);
-            });
-        }
+
+        // Initial calculation on load
+        calculateProgress();
     </script>
 </body>
+
 </html>
