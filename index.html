@@ -14,6 +14,7 @@
             /* Soft Green */
             --card-bg: #ffffff;
             --border-color: #e5e7eb;
+            --input-bg: #f3f4f6;
         }
 
         /* Dark mode variables */
@@ -24,6 +25,7 @@
             --primary: #10b981;
             --card-bg: #1f2937;
             --border-color: #374151;
+            --input-bg: #374151;
         }
 
         body {
@@ -122,6 +124,49 @@
             height: 100%;
             width: 3px;
             background-color: rgba(255, 255, 255, 0.7);
+        }
+
+        /* Surplus Area */
+        .surplus-container {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            background: var(--bg-color);
+            padding: 15px;
+            border-radius: 16px;
+            margin-bottom: 25px;
+            border: 1px solid var(--border-color);
+        }
+
+        .surplus-label {
+            font-weight: 600;
+            font-size: 14px;
+        }
+
+        .surplus-input-wrapper {
+            display: flex;
+            align-items: center;
+            background: var(--input-bg);
+            border-radius: 8px;
+            padding: 5px 10px;
+        }
+
+        .currency-symbol {
+            color: var(--text-muted);
+            margin-right: 5px;
+            font-weight: 500;
+        }
+
+        .surplus-input {
+            background: transparent;
+            border: none;
+            color: var(--text-main);
+            font-weight: 600;
+            font-size: 16px;
+            width: 100px;
+            text-align: right;
+            outline: none;
+            font-family: inherit;
         }
 
         /* Month List Styles */
@@ -239,6 +284,16 @@
             </div>
         </div>
 
+        <!-- Surplus Amount Box -->
+        <div class="surplus-container">
+            <span class="surplus-label">Surplus Amount</span>
+            <div class="surplus-input-wrapper">
+                <span class="currency-symbol">₹</span>
+                <input type="text" id="surplus-input" class="surplus-input" placeholder="0"
+                    oninput="handleSurplusInput(this)">
+            </div>
+        </div>
+
         <div class="month-list" id="months-container">
             <!-- JavaScript will populate the months here -->
         </div>
@@ -253,6 +308,7 @@
         const overallProgressFill = document.getElementById('overall-progress-fill');
         const yearlyGoalText = document.getElementById('yearly-goal-text');
         const overallGoalText = document.getElementById('overall-goal-text');
+        const surplusInput = document.getElementById('surplus-input');
 
         const SAVING_PER_MONTH = 100000;
         const YEARLY_GOAL = 1200000;
@@ -260,6 +316,10 @@
 
         // Load progress from localStorage
         let savedProgress = JSON.parse(localStorage.getItem("minimal_savings_progress") || "{}");
+        let savedSurplus = localStorage.getItem("minimal_surplus_amount") || "0";
+
+        // Initialize surplus input
+        surplusInput.value = parseInt(savedSurplus).toLocaleString('en-IN') || "";
 
         // Theme management
         let isDarkMode = localStorage.getItem("savings_tracker_theme") === "dark";
@@ -303,6 +363,23 @@
             container.appendChild(item);
         });
 
+        function handleSurplusInput(inputElement) {
+            // Remove non-digit characters to get raw number
+            let rawValue = inputElement.value.replace(/\D/g, '');
+            if (!rawValue) rawValue = "0";
+
+            // Save raw value to localStorage
+            localStorage.setItem("minimal_surplus_amount", rawValue);
+            savedSurplus = rawValue;
+
+            // Format back to Indian Rupee convention visually in the input box
+            const numberValue = parseInt(rawValue);
+            inputElement.value = numberValue === 0 ? "" : numberValue.toLocaleString('en-IN');
+
+            // Recalculate everything
+            calculateProgress();
+        }
+
         function calculateProgress(checkboxElement) {
             // Update localStorage if triggered by a checkbox change
             if (checkboxElement) {
@@ -311,17 +388,23 @@
             }
 
             const checkedCount = document.querySelectorAll('.month-checkbox:checked').length;
-            const totalSaved = checkedCount * SAVING_PER_MONTH;
+            const progressFromMonths = checkedCount * SAVING_PER_MONTH;
+            const surplusAmount = parseInt(savedSurplus) || 0;
 
-            // Update Yearly Progress
-            const yearlyPercentage = (totalSaved / YEARLY_GOAL) * 100;
-            yearlyProgressFill.style.width = `${yearlyPercentage}%`;
-            yearlyGoalText.textContent = `${formatToLakhs(totalSaved)} / ${formatToLakhs(YEARLY_GOAL)}`;
+            // Total includes months progress + surplus
+            const totalDisplayAmount = progressFromMonths + surplusAmount;
 
-            // Update Overall Progress
-            const overallPercentage = (totalSaved / OVERALL_GOAL) * 100;
-            overallProgressFill.style.width = `${overallPercentage}%`;
-            overallGoalText.textContent = `${formatToLakhs(totalSaved)} / ${formatToLakhs(OVERALL_GOAL)}`;
+            // Progress bar filling ONLY depends on the checked months (progressFromMonths)
+            const yearlyPercentage = Math.min((progressFromMonths / YEARLY_GOAL) * 100, 100);
+            yearlyProgressFill.style.width = \`\${yearlyPercentage}%\`;
+            
+            // Text display depends on the total combined amount
+            yearlyGoalText.textContent = \`\${formatToLakhs(totalDisplayAmount)} / \${formatToLakhs(YEARLY_GOAL)}\`;
+
+            // Same logic for overall goal
+            const overallPercentage = Math.min((progressFromMonths / OVERALL_GOAL) * 100, 100);
+            overallProgressFill.style.width = \`\${overallPercentage}%\`;
+            overallGoalText.textContent = \`\${formatToLakhs(totalDisplayAmount)} / \${formatToLakhs(OVERALL_GOAL)}\`;
         }
 
         // Initial calculation on load
