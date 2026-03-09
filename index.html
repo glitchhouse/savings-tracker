@@ -149,6 +149,7 @@
             background: var(--input-bg);
             border-radius: 8px;
             padding: 5px 10px;
+            position: relative;
         }
 
         .currency-symbol {
@@ -167,6 +168,18 @@
             text-align: right;
             outline: none;
             font-family: inherit;
+        }
+
+        .surplus-check {
+            color: var(--primary);
+            margin-left: 8px;
+            opacity: 0;
+            transition: opacity 0.3s;
+            font-weight: bold;
+        }
+
+        .surplus-check.show {
+            opacity: 1;
         }
 
         /* Month List Styles */
@@ -291,6 +304,7 @@
                 <span class="currency-symbol">₹</span>
                 <input type="text" id="surplus-input" class="surplus-input" placeholder="0"
                     oninput="handleSurplusInput(this)">
+                <span id="surplus-check" class="surplus-check">✓</span>
             </div>
         </div>
 
@@ -309,6 +323,7 @@
         const yearlyGoalText = document.getElementById('yearly-goal-text');
         const overallGoalText = document.getElementById('overall-goal-text');
         const surplusInput = document.getElementById('surplus-input');
+        const surplusCheck = document.getElementById('surplus-check');
 
         const SAVING_PER_MONTH = 100000;
         const YEARLY_GOAL = 1200000;
@@ -347,6 +362,32 @@
         // Function to format numbers as Indian Rupees
         const formatToLakhs = (num) => new Intl.NumberFormat('en-IN', { style: 'currency', currency: 'INR', maximumFractionDigits: 0 }).format(num);
 
+        let checkTimeout;
+
+        function handleSurplusInput(inputElement) {
+            // Remove non-digit characters to get raw number
+            let rawValue = inputElement.value.replace(/\\D/g, '');
+            if (!rawValue) rawValue = "0";
+
+            // Save raw value to localStorage
+            localStorage.setItem("minimal_surplus_amount", rawValue);
+            savedSurplus = rawValue;
+
+            // Format back to Indian Rupee convention visually in the input box
+            const numberValue = parseInt(rawValue);
+            inputElement.value = numberValue === 0 ? "" : numberValue.toLocaleString('en-IN');
+
+            // Show temporary checkmark
+            surplusCheck.classList.add('show');
+            clearTimeout(checkTimeout);
+            checkTimeout = setTimeout(() => {
+                surplusCheck.classList.remove('show');
+            }, 1000); // Checkmark disappears after 1 second
+
+            // Recalculate everything
+            calculateProgress();
+        }
+
         months.forEach(month => {
             const item = document.createElement('div');
             item.className = 'month-item';
@@ -362,23 +403,6 @@
             `;
             container.appendChild(item);
         });
-
-        function handleSurplusInput(inputElement) {
-            // Remove non-digit characters to get raw number
-            let rawValue = inputElement.value.replace(/\D/g, '');
-            if (!rawValue) rawValue = "0";
-
-            // Save raw value to localStorage
-            localStorage.setItem("minimal_surplus_amount", rawValue);
-            savedSurplus = rawValue;
-
-            // Format back to Indian Rupee convention visually in the input box
-            const numberValue = parseInt(rawValue);
-            inputElement.value = numberValue === 0 ? "" : numberValue.toLocaleString('en-IN');
-
-            // Recalculate everything
-            calculateProgress();
-        }
 
         function calculateProgress(checkboxElement) {
             // Update localStorage if triggered by a checkbox change
